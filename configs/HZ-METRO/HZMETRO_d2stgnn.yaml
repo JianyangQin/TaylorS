@@ -1,0 +1,113 @@
+---
+# start up
+start_up:
+  base_model_name:          d2stgnn
+  adjust_model_name:        adjust
+  save_path:                exps
+  save_metric:              Loss                             # select metric for save checkpoint [Loss, MAE, RMSE]
+
+# Data Processing
+data_args:
+  dataset:                  HZ-METRO
+  data_path:                ['datasets/HZ-METRO/train.pkl', 'datasets/HZ-METRO/val.pkl', 'datasets/HZ-METRO/test.pkl']      # data path
+  adj_path:                 datasets/HZ-METRO/graph_hz_sml.pkl      # adj data path
+  batch_size:               32                                      # batch size
+  train_ratio:              0.6                                     # train ratio [0.0 ~ 1.0]
+  val_ratio:                0.2                                     # val ratio [0.0 ~ 1.0]
+  test_ratio:               0.2                                     # test ratio [0.0 ~ 1.0]
+  imputate_ratio:           0.1                                     # imputate ratio [0.0 ~ 1.0]
+  num_of_history:           4                                       # length of observed data
+  num_of_predict:           4                                       # length of predict data
+  num_of_vertices:          80                                      # number of vertices
+  num_of_features:          2                                       # num of features to predict
+  start_time:               20190101                                # spatio-temporal series start time
+  sample_freq:              15min                                   # sample frequency of data, [H: hourly, min: minutely]
+  time_per_day:             96                                      # time per day = 24 * 60 / sample_freq
+  time_embedding:           discrete                                # select time embedding type from [continuous, discrete]
+  time_features:            2                                       # select time features from [2, 4]
+  scalar:                   standard                                # select scalar approach from [standard, minmax, normal]
+
+# Base Model Args
+base_model_args:
+  num_hidden:               32
+  node_hidden:              12
+  time_emb_dim:             4
+  dropout:                  0.1
+  k_t:                      1
+  k_s:                      2
+  gap:                      4
+  num_modalities:           2
+
+# Base Model Training Args
+base_train_args:
+  # criterion
+  criterion_type:           L1                    # select the criterion form [L1, SmoothL1, MSE]
+  # optimizer
+  optimization:             Adam                  # select the optimizer from [Adam, AdamW]
+  # learning rate
+  train_lr:                 2.0e-3                # learning rate in training phase
+  finetune_lr:              1.0e-6                # learning rate in finetune phase
+  weight_decay:             1.0e-5                # weight decay of optimizer
+  epsilon:                  1.0e-8                # eps of optimizer
+  # learning rate scheduler
+  lr_decay:                 MultiStepLR           # if use learning rate scheduler, select from [StepLR, MultiStepLR, ReduceLROnPlateau], else False
+  lr_decay_step:            [1,30,38,46,54,200]   # steps where decay the learning rate
+  lr_decay_ratio:           0.5                   # ratios where decay the learning rate
+  # clip
+  clip:                     False                 # if use clip, set the max_norm of clip
+  # procedure
+  max_epoch:                300                   # total epoch numbers
+  early_stop:               100                   # patience for earlystopping
+  # others
+  label_scalar:             False                 # if scalar set True, else set False
+  pred_scalar:              False                 # if scalar set True, else set False
+  test_scalar:              True                  # if scalar set True, else set False
+  visual:                   True                  # if visual set True, else set False
+
+
+# Adjust Model Args
+adjust_model_args:
+  num_of_layer:             1
+
+  hidden_dim:               64
+  output_dim:               64
+  mu_dim:                   4
+  num_of_head:              8
+  bn_decay:                 0.1
+  K:                        3
+
+  dropout:                  0.3
+  nhid:                     32
+  adjtype:                  doubletransition
+  gcn_bool:                 True
+  aptonly:                  False
+  addaptadj:                True
+  randomadj:                True
+
+
+# Adjust Model Training Args
+adjust_train_args:
+  # criterion
+  criterion_type:           L1                # select the criterion form [L1, SmoothL1, MSE]
+  # optimizer
+  optimization:             Adam              # select the optimizer from [Adam, AdamW]
+  # learning rate
+  lr:                       1.0e-3            # learning rate
+  weight_decay:             0.                # weight decay of optimizer
+  epsilon:                  1.0e-8            # eps of optimizer
+  # learning rate scheduler
+  lr_decay:                 StepLR            # if use learning rate scheduler, select from [StepLR, MultiStepLR, ReduceLROnPlateau], else False
+  lr_decay_step:            10                # steps where decay the learning rate
+  lr_decay_ratio:           0.9               # ratios where decay the learning rate
+  # clip
+  clip:                     5                 # if use clip, set the max_norm of clip
+  # procedure
+  max_epoch:                80                # total epoch numbers
+  early_stop:               30                # patience for earlystopping
+  # others
+  label_scalar:             False             # if scalar set True, else set False
+  base_scalar:              False             # if scalar set True, else set False
+  adjust_scalar:            False             # if scalar set True, else set False
+  test_scalar:              True              # if scalar set True, else set False
+  visual:                   True              # if visual set True, else set False
+
